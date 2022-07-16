@@ -1,0 +1,13 @@
+.cat1{
+  background-image:url('https://www.kfc.com.ph/Content/OnlineOrderingImages/Shared/Category_Sprite.png');
+  background-position: -19px -20px !important;
+  height: 75px;
+  width: 75px;
+}
+
+.cat2{
+  background-image:url('https://www.kfc.com.ph/Content/OnlineOrderingImages/Shared/Category_Sprite.png');
+  background-position: -109px -20px !important;
+  height: 75px;
+  width: 75px;
+}
