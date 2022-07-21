@@ -17,9 +17,11 @@ function strposX($haystack, $needle, $number = 0)
     );
 }
 
-function api(){
+function api($api=null){
     global $path;
+    if($api!=null) $path = $api;
     if(isset($_POST)) extract($_POST);
+    if(isset($_GET)) extract($_GET);
     if(!file_exists("api/$path.php")){
         if(!file_exists("api/$path/index.php")){   
             header("HTTP/1.1 404 Not Found");
@@ -33,5 +35,13 @@ function api(){
     header("Content-Type: application/json; charset=utf-8");
     include "api/$path.php";
 }
+
+function route($routeName,$api){
+    global $path;
+    if($routeName==$path){
+      api($api);
+      exit();
+    }
+  }
 
 
