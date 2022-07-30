@@ -20,7 +20,7 @@ class Sql{
      * @author Van
      */
     public function __construct($dbase="default",$server="",$user="",$pass="",$dbname="",$driver=""){
-        require "database.php";
+        require "Database.php";
         if($dbase != null){
             $server = $db[$dbase]["server"];
             $user = $db[$dbase]["user"];
@@ -30,9 +30,9 @@ class Sql{
         }
         try{
             $this->conn = new PDO("$driver:host=$server;dbname=$dbname;",$user,$pass,
-                array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
         }catch(PDOException $e){
-            $this->error = $e->getMessage();
+            exit($this->error = $e->getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ class Sql{
         try{
             $stmt = $this->conn->prepare($query);
             $stmt->execute($inputs);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
         }catch(PDOException $e){
             $this->error = $e->getMessage();
             return false;

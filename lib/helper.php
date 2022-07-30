@@ -1,47 +1,77 @@
 <?php
-//get uri
-$url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
-"://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-$path = parse_url($url, PHP_URL_PATH);
-//remove string from last "/" to first character
-$path = trim(ltrim(strchr($path,"/"),"/"));
-$path = ltrim(substr($path,strposX($path,"/",1)),"/");
+$path = $_SERVER['REQUEST_URI'];
+//get $path except first "/"
+$path = substr($path, 1);
+//remove string from start to second "/"
+$path = substr($path, strpos($path, "/") + 1);
 
-$sql = new Sql();
+$method = $_SERVER['REQUEST_METHOD'];
 
-function strposX($haystack, $needle, $number = 0)
-{
-    return strpos($haystack, $needle,
-        $number > 1 ?
-        strposX($haystack, $needle, $number - 1) + strlen($needle) : 0
-    );
-}
-
-function api($api=null){
+function api($routeName,$api,$method){
     global $path;
-    if($api!=null) $path = $api;
-    if(isset($_POST)) extract($_POST);
-    if(isset($_GET)) extract($_GET);
+    $route = $routeName;
+    //for request with parameters in uri 
+    if(strpos($routeName,"{")){   
+        //get routeName without parameters 
+        $tempRoute = substr($routeName,0,strpos($routeName,"{")+1);
+        $route = substr($tempRoute,0,strlen($tempRoute)-1);
+        //get param keys
+        $paramKeys = substr($routeName,strpos($routeName,"{")+1);
+        $paramKeys = substr($paramKeys,0,strlen($paramKeys)-1);
+        $paramKeys = explode(",",$paramKeys);
+
+        
+        //check if routename exists in request uri
+        if(str_contains($path,$route)){
+            $pos = strrpos($route,"/");
+            $paramValues = substr($path,$pos+1);
+            $paramValues = explode("/",$paramValues);
+            if(count($paramKeys) != count($paramValues))
+                notFound();
+            $params = array_combine($paramKeys,$paramValues);
+            $path = substr($path,0,strlen($route)-1);
+            $route = substr($tempRoute,0,strlen($tempRoute)-2);
+            extract($params);
+        }
+    }
+    if($route != $path)
+        return;
+    $path = $api;
+    extract($method);
     if(!file_exists("api/$path.php")){
         if(!file_exists("api/$path/index.php")){   
-            header("HTTP/1.1 404 Not Found");
-            exit("URL not found");
+            notFound();
         }
         $path = $path."/index";
     }
-    global $sql;
-    header('Cache-Control: max-age=86400');
-    header("Access-Control-Allow-Origin: *");
-    header("Content-Type: application/json; charset=utf-8");
+    
     include "api/$path.php";
+    exit();
 }
 
-function route($routeName,$api){
-    global $path;
-    if($routeName==$path){
-      api($api);
-      exit();
-    }
-  }
+function post($routeName,$api){
+    global $method;
+    if($method != "POST") return;
+    api($routeName,$api,$_POST);
+}
+
+function get($routeName,$api){
+    global $method;
+    if($method != "GET") return;
+    api($routeName,$api,$_GET);
+}
+
+function put($routeName,$api){
+    global $method;
+    if($method != "PUT") return;
+    $_PUT = json_decode(file_get_contents('php://input'),true);
+    api($routeName,$api,$_PUT);
+}
+
+
+function notFound(){
+    header("HTTP/1.1 404 Not Found");
+    exit("URL not found");
+}
 
 

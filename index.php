@@ -1,7 +1,7 @@
 <?php
   session_start();
-  require_once "lib/sql.php";
-  require_once "lib/helper.php";
+  require_once "lib/Sql.php";
+  require_once "lib/Helper.php";
   
-  route("/","api/items");
+  get("api/items","items");
 ?>

@@ -1,12 +1,10 @@
 <?php
-//rename to database.php
-$db = array(
-
-    "default" => array(
+$db = [
+    "default" => [
         "server" => "localhost",
         "user" => "root",
         "pass" => "",
-        "dbname" => "db",
+        "dbname" => "pos",
         "driver" => "mysql"
-    )
-);
+    ]
+];
